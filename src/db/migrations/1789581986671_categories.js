@@ -11,10 +11,9 @@
  *   and isn't needed yet. If you need it later, you add a parent_id —
  *   but don't add it now "just in case."
  */
-export const shorthands = undefined;
 
-/** @type {import('node-pg-migrate').MigrationBuilder}*/
-export const up = (pgm) => {
+/** @type {import('node-pg-migrate').MigrationBuilder} */
+exports.up = (pgm) => {
   pgm.createTable("categories", {
     id: {
       type: "serial",
@@ -41,6 +40,7 @@ export const up = (pgm) => {
   });
 };
 
-export const down = (pgm) => {
+/** @type {import('node-pg-migrate').MigrationBuilder} */
+exports.down = (pgm) => {
   pgm.dropTable("categories");
 };

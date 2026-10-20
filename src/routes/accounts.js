@@ -1,6 +1,5 @@
 const { Router } = require("express");
 const accountService = require("../services/accountService");
-const asyncHandler = require("../utils/asyncHandler");
 
 console.log("ACC SERVICE", accountService);
 const router = Router();
@@ -20,24 +19,35 @@ const router = Router();
  */
 
 // GET /api/accounts
-router.get(
-  "/",
-  asyncHandler(async (req, res) => {
-    const page = parseInt(req.query.page, 10) || 1;
-    const limit = parseInt(req.query.limit, 10) || 20;
+// http://localhost:3000/api/accounts?limit=3&page=2
+router.get("/", async (req, res) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 20;
 
-    const result = await accountService.listAccounts({ page, limit });
-    res.json(result);
-  }),
-);
+  const result = await accountService.listAccounts({ page, limit });
+  res.json(result);
+});
 
-router.get(
-  "/:id",
-  asyncHandler(async (req, res) => {
-    const id = parseInt(req.params.id, 10);
-    const account = await accountService.getAccountById(id);
-    res.json(account);
-  }),
-);
+router.get("/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const account = await accountService.getAccountById(id);
+  res.json(account);
+});
 
+router.post("/", async (req, res) => {
+  const newAcct = await accountService.createAccount(req.body);
+  res.status(201).json(newAcct);
+});
+
+router.put("/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const updated = await accountService.updateAccount(id, req.body);
+  res.send(updated);
+});
+
+router.delete("/:id", async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  const deleted = await accountService.deleteAccountById(id);
+  res.status(204).send();
+});
 module.exports = router;

@@ -1,6 +1,5 @@
 const db = require("./index");
 
-<<<<<<< HEAD
 /**
  * Data access for accounts.
  *
@@ -21,62 +20,26 @@ async function findAll({ limit = 20, offset = 0 } = {}) {
     `SELECT a.*, c.name AS default_category_name
         FROM accounts a
         LEFT JOIN categories c ON a.default_category_id = c.id
-        ORDER BY a.name ASC
+        ORDER by a.name ASC
         LIMIT $1 OFFSET $2`,
-=======
-async function findAll({ limit = 20, offset = 0 } = {}) {
-  const { rows } = await db.query(
-    `
-    SELECT a.*, c.name AS default_category_name
-    FROM accounts a
-    LEFT JOIN categories c ON a.default_category_id = c.id
-    ORDER BY a.name ASC
-    LIMIT $1 OFFSET $2
-    `,
->>>>>>> e7b135b (added lesson 2 code)
     [limit, offset],
   );
   return rows;
 }
 
-<<<<<<< HEAD
 async function findById(id) {
-  const { rows } = await db.query(
-    `SELECT a.*, c.name
-        FROM accounts a
-        LEFT JOIN categories c ON a.default_category_id = c.id
-        WHERE a.id = $1`,
+  const {
+    rows: [account],
+  } = await db.query(
+    `
+    SELECT a.*, c.name AS default_category_name
+    FROM accounts a
+    LEFT JOIN categories c ON a.default_category_id = c.id
+    WHERE a.id = $1`,
     [id],
   );
-  return rows[0] || null;
-}
 
-async function updateById(id, fields) {
-  const keys = Object.keys(fields);
-  if (keys.length === 0) return findById(id);
-  const acceptedFields = new Set([
-    "name",
-    "account_type",
-    "institution",
-    "currency",
-    "is_active",
-  ]);
-  const filteredkeys = (key) => acceptedFields.has(key);
-  const setClauses = filteredkeys.map((key, i) => `${key} = $${i + 1}`);
-  setClauses.push(`updated_at = now()`);
-  const values = filteredkeys.map((key) => fields[key]);
-  values.push(id);
-
-  const { rows } = await db.query(
-    `
-    UPDATE categories
-    SET ${setClauses.join(", ")}
-    WHERE id = $${values.length}
-    RETURNING *`,
-    values,
-  );
-
-  return rows[0] || null;
+  return account || null;
 }
 
 async function count() {
@@ -86,14 +49,75 @@ async function count() {
   return rows[0].total;
 }
 
-module.exports = { findAll, findById, count };
-=======
-async function count() {
-  const { rows } = await db.query(`
-        SELECT COUNT(*)::int AS total FROM accounts`);
+async function deleteById(id) {
+  const {
+    rows: [deleted],
+  } = await db.query(
+    `
+    DELETE FROM accounts WHERE id=$1 RETURNING *`,
+    [id],
+  );
 
-  return rows[0].total;
+  return deleted || null;
 }
 
-module.exports = { findAll, count };
->>>>>>> e7b135b (added lesson 2 code)
+async function create({
+  name,
+  account_type,
+  institution,
+  currency,
+  is_active,
+  default_category_id,
+}) {
+  const {
+    rows: [account],
+  } = await db.query(
+    `
+    INSERT INTO accounts(
+    name, 
+    account_type, 
+    institution, 
+    currency, 
+    is_active, 
+    default_category_id)
+    VALUES($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [name, account_type, institution, currency, is_active, default_category_id],
+  );
+  return account;
+}
+// {name:
+//   "new acct name",
+//   account_type:"new acct_type"
+// }
+async function updateById(id, fields) {
+  const UPDATABLE = [
+    "name",
+    "account_type",
+    "currency",
+    "default_category_id",
+    "is_active",
+    "institution",
+  ];
+
+  const cols = UPDATABLE.filter((col) => Object.hasOwn(fields, col));
+  if (cols.length === 0) return findById(id);
+  const values = cols.map((col) => fields[col]);
+  const setClauses = cols.map((col, i) => `${col} = $${i + 1}`);
+  setClauses.push("updated_at = now()");
+  values.push(id);
+
+  const {
+    rows: [updated],
+  } = await db.query(
+    `
+    UPDATE accounts
+    SET ${setClauses.join(", ")}
+    WHERE id = $${values.length}
+    RETURNING *
+    `,
+    values,
+  );
+  return updated || null;
+}
+
+module.exports = { findAll, findById, count, deleteById, create, updateById };

@@ -9,7 +9,7 @@ pool.on("connect", () => {
 });
 
 // Log pool errors (e.g. connections dropping, etc)
-pool.on("error", () => {
+pool.on("error", (err) => {
   console.log("Database pool: unexpected error on idle client", err);
   process.exit(1);
 });

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 const accountDb = require("../db/accounts");
 
 /**
@@ -22,17 +21,6 @@ async function listAccounts({ page = 1, limit = 20 } = {}) {
   const [accounts, total] = await Promise.all([
     accountDb.findAll({ limit, offset }),
     accountDb.count(),
-=======
-const { findAll, count } = require("../db/accounts");
-
-async function listAccounts({ page = 1, limit = 20 } = {}) {
-  // convert page number to offset
-  console.log(limit);
-  const offset = (page - 1) * limit;
-  const [accounts, total] = await Promise.all([
-    findAll({ limit, offset }),
-    count(),
->>>>>>> e7b135b (added lesson 2 code)
   ]);
 
   return {
@@ -46,7 +34,6 @@ async function listAccounts({ page = 1, limit = 20 } = {}) {
   };
 }
 
-<<<<<<< HEAD
 async function getAccountById(id) {
   const account = await accountDb.findById(id);
   if (!account) {
@@ -57,9 +44,34 @@ async function getAccountById(id) {
   return account;
 }
 
-module.exports = { listAccounts, getAccountById };
-=======
+async function createAccount(data) {
+  return accountDb.create(data);
+}
+
+async function updateAccount(id, data) {
+  const account = await accountDb.updateById(id, data);
+  if (!account) {
+    const error = new Error(`Account with id ${id} not found!`);
+    error.statusCode = 404;
+    throw error;
+  }
+  return account;
+}
+
+async function deleteAccountById(id) {
+  const deleted = await accountDb.deleteById(id);
+  if (!deleted) {
+    const error = new Error(`Account with id ${id} not found!`);
+    error.statusCode = 404;
+    throw error;
+  }
+  return deleted;
+}
+
 module.exports = {
   listAccounts,
+  getAccountById,
+  deleteAccountById,
+  createAccount,
+  updateAccount,
 };
->>>>>>> e7b135b (added lesson 2 code)

@@ -28,4 +28,6 @@ export const up = (pgm) => {
   pgm.createIndex("accounts", "default_category_id");
 };
 
-export const down = (pgm) => {};
+exports.down = (pgm) => {
+  pgm.dropColumn("accounts", "default_category_id");
+};

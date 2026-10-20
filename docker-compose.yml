@@ -1,18 +1,18 @@
 services:
   db-audit:
     image: postgres:16
-    container_name: ledger-db-audit
+    container_name: ledger-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: ledger
       POSTGRES_PASSWORD: ledger_dev
-      POSTGRES_DB: ledger_dev_audit
+      POSTGRES_DB: ledger_dev
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ledger -d ledger_dev_audit"]
+      test: ["CMD-SHELL", "pg_isready -U ledger -d ledger_dev"]
       interval: 10s
       timeout: 5s
       retries: 5
