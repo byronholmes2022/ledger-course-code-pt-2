@@ -1,4 +1,5 @@
 const db = require("./index");
+const handlePgError = require("../utils/pgErrors");
 
 // Columns a client is allowed to change via updateById.
 const UPDATABLE = ["name", "description"];
@@ -16,13 +17,20 @@ async function findById(id) {
 }
 
 async function create({ name, description }) {
-  const { rows } = await db.query(
-    `INSERT INTO categories (name, description)
+  return handlePgError(
+    async () => {
+      const { rows } = await db.query(
+        `INSERT INTO categories (name, description)
      VALUES ($1, $2)
      RETURNING *`,
-    [name, description || null],
+        [name, description || null],
+      );
+      return rows[0];
+    },
+    {
+      uniqueColumns: { name: `A category name "${name}" already exists"` },
+    },
   );
-  return rows[0];
 }
 
 async function updateById(id, fields) {
