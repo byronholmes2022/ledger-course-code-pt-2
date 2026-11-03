@@ -2,7 +2,7 @@ const express = require("express");
 const config = require("./config");
 const db = require("./db");
 const errorHandler = require("./middleware/errorHandler");
-
+const { NotFoundError } = require("./utils/errorClasses");
 const app = express();
 
 // Parse JSON request bodies
@@ -28,6 +28,12 @@ app.get("/", (req, res) => {
     message: "Ledger API",
     version: "0.1.0",
   });
+});
+
+// 404 catch-all for unknown routes
+// Must come AFTER all valid routes but BEFORE the error handler
+app.use((req, res, next) => {
+  next(new NotFoundError(`Cannot ${req.method} ${req.originalUrl}`, 404));
 });
 
 // Centralized error handler — MUST be after all routes

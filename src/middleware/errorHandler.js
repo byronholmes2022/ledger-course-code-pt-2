@@ -28,6 +28,11 @@ function errorHandler(err, req, res, next) {
     if (err.details && err.details.length > 0) {
       details = err.details;
     }
+  } else if (err.type === "entity.parse.failed") {
+    // Malformed JSON from express.json()
+    // Treat it as a 400 (Bad input), NOT a 500 (a server bug)
+    statusCode = 400;
+    message = "Invalid JSON in request body";
   } else {
     // -- Programming error (actual bug) --
     // DON'T LEAK INTERNALS TO THE CLIENT!!!
